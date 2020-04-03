@@ -55,12 +55,13 @@ def iniciar(fichas_gratis):
 			except: pass
 
 			if fichas == sum(apostas.values()):
-				print('Você não tem mais fichas para apostar!')
+				print('STICKMAN:\tVocê não tem fichas o suficiente para fazer novas apostas!')
 				break
 
-			if not perguntar_bool('Quer fazer outra aposta, SIM ou NÃO?', entradas_possiveis['positivo'], entradas_possiveis['negativo']): break
+			if not perguntar_bool('Quer fazer outra aposta? SIM ou NÃO.', entradas_possiveis['positivo'], entradas_possiveis['negativo']): break
 
 		print('\n\tFASE: COME OUT')
+		print('\tFICHAS: %d' % fichas)
 		print('\tAPOSTAS:')
 
 		for aposta in apostas.keys():
@@ -70,7 +71,7 @@ def iniciar(fichas_gratis):
 
 		dados = [randint(1,6), randint(1,6)]
 		resultado = sum(dados)
-		input('\tRESULTADOS: %d + %d = %d' % (dados[0], dados[1], resultado))
+		input('\n\tRESULTADOS: %d + %d = %d' % (dados[0], dados[1], resultado))
 
 		point = False
 		point_number = resultado
@@ -81,26 +82,30 @@ def iniciar(fichas_gratis):
 		for aposta in apostas.keys():
 			print('\t- %s:' % aposta, end = ' ')
 
+			del_passline = False
+
 			if aposta.lower() == entradas_possiveis['pass line']:
 
 				if point:
-					print('POINT %d' % resultado)
+					print('%d no %d' % (apostas[aposta], resultado))
 
 				elif resultado in [7, 11]:
 					print('GANHOU %d' % apostas[aposta])
 					fichas += apostas[aposta]
+					del_passline = True
 
 				else:
 					print('PERDEU %d' % apostas[aposta])
 					fichas -= apostas[aposta]
+					del_passline = True
 			elif aposta.lower() == entradas_possiveis['field']:
 
 				if resultado == 2:
-					print('GANHOU %d' % apostas[aposta] * 2)
+					print('GANHOU %d' % (apostas[aposta] * 2))
 					fichas += apostas[aposta] * 2
 
 				elif resultado == 12:
-					print('GANHOU %d' % apostas[aposta] * 3)
+					print('GANHOU %d' % (apostas[aposta] * 3))
 					fichas += apostas[aposta] * 3
 
 				elif resultado in [3, 4, 9, 10, 11]:
@@ -110,33 +115,48 @@ def iniciar(fichas_gratis):
 				else:
 					print('PERDEU %d' % apostas[aposta])
 					fichas -= apostas[aposta]
+
 			elif aposta.lower() == entradas_possiveis['any craps']:
 
 				if resultado in [2, 3, 12]:
-					print('GANHOU %d' % apostas[aposta] * 7)
+					print('GANHOU %d' % (apostas[aposta] * 7))
 					fichas += apostas[aposta] * 7
 
 				else:
 					print('PERDEU %d' % apostas[aposta])
 					fichas -= apostas[aposta]
+
 			elif aposta.lower() == entradas_possiveis['twelve']:
 
 				if resultado == 12:
-					print('GANHOU %d' % apostas[aposta] * 30)
+					print('GANHOU %d' % (apostas[aposta] * 30))
 					fichas += apostas[aposta] * 30
 
 				else:
 					print('PERDEU %d' % apostas[aposta])
 					fichas -= apostas[aposta]
+		input('\n\tPRESSIONE ENTER PARA CONTINUAR')
+
+		if del_passline: del apostas[entradas_possiveis['pass line'].upper()]
+		try: del apostas[entradas_possiveis['any craps'].upper()]
+		except: pass
+		try: del apostas[entradas_possiveis['twelve'].upper()]
+		except: pass
+		try: del apostas[entradas_possiveis['field'].upper()]
+		except: pass
 
 		print()
 
-		while point:
+		while point and fichas > 0:
 
 			print('\tFASE: POINT no %d' % point_number)
 			print('\tFICHAS: %d\n' % fichas)
 
-			apostar = perguntar_bool('E aí, vai apostar, SIM ou NÃO?', entradas_possiveis['positivo'], entradas_possiveis['negativo'])
+			if fichas - sum(apostas.values()) == 0:
+				input('STICKMAN:\tVocê não tem fichas o suficiente para fazer novas apostas!')
+				apostar = False
+			else:
+				apostar = perguntar_bool('E aí, vai apostar, SIM ou NÃO?', entradas_possiveis['positivo'], entradas_possiveis['negativo'])
 
 			while apostar:
 
@@ -149,10 +169,94 @@ def iniciar(fichas_gratis):
 				except: pass
 
 				if fichas == sum(apostas.values()):
-					print('Você não tem mais fichas para apostar!')
+					print('STICKMAN:\tVocê não tem mais fichas para apostar!')
 					break
 
 				if not perguntar_bool('Quer fazer outra aposta, SIM ou NÃO?', entradas_possiveis['positivo'], entradas_possiveis['negativo']): break
+
+			print('\n\tFASE: POINT no %d' % point_number)
+			print('\tFICHAS: %d' % fichas)
+			print('\tAPOSTAS:')
+
+			for aposta in apostas.keys():
+				print('\t- %s: %d' % (aposta, apostas[aposta]), end = '')
+				if aposta == entradas_possiveis['pass line']:print(' no %d' % point_number)
+				else: print()
+			
+			input('\n\tPRESSIONE ENTER PARA ROLAR DADOS')
+
+			dados = [randint(1,6), randint(1,6)]
+			resultado = sum(dados)
+			input('\n\tRESULTADOS: %d + %d = %d' % (dados[0], dados[1], resultado))
+
+			for aposta in apostas.keys():
+				print('\t- %s:' % aposta, end = ' ')
+
+				del_passline = False
+
+				if aposta.lower() == entradas_possiveis['pass line']:
+
+					if resultado == point_number:
+						print('GANHOU %d' % apostas[aposta])
+						fichas += apostas[aposta]
+						del_passline = True
+						point = False
+
+					elif resultado == 7:
+						print('PERDEU %d' % apostas[aposta])
+						fichas -= apostas[aposta]
+						del_passline = True
+						point = False
+
+					else:
+						print('%d no %d' % (apostas[aposta], point_number))
+
+				elif aposta.lower() == entradas_possiveis['field']:
+
+					if resultado == 2:
+						print('GANHOU %d' % (apostas[aposta] * 2))
+						fichas += apostas[aposta] * 2
+
+					elif resultado == 12:
+						print('GANHOU %d' % (apostas[aposta] * 3))
+						fichas += apostas[aposta] * 3
+
+					elif resultado in [3, 4, 9, 10, 11]:
+						print('GANHOU %d' % apostas[aposta])
+						fichas += apostas[aposta]
+
+					else:
+						print('PERDEU %d' % apostas[aposta])
+						fichas -= apostas[aposta]
+
+				elif aposta.lower() == entradas_possiveis['any craps']:
+
+					if resultado in [2, 3, 12]:
+						print('GANHOU %d' % (apostas[aposta] * 7))
+						fichas += apostas[aposta] * 7
+
+					else:
+						print('PERDEU %d' % apostas[aposta])
+						fichas -= apostas[aposta]
+
+				elif aposta.lower() == entradas_possiveis['twelve']:
+
+					if resultado == 12:
+						print('GANHOU %d' % (apostas[aposta] * 30))
+						fichas += apostas[aposta] * 30
+
+					else:
+						print('PERDEU %d' % apostas[aposta])
+						fichas -= apostas[aposta]
+			input('\n\tPRESSIONE ENTER PARA CONTINUAR')
+
+			if del_passline: del apostas[entradas_possiveis['pass line'].upper()]
+			try: del apostas[entradas_possiveis['any craps'].upper()]
+			except: pass
+			try: del apostas[entradas_possiveis['twelve'].upper()]
+			except: pass
+			try: del apostas[entradas_possiveis['field'].upper()]
+			except: pass
 
 
 		rodadas += 1
